@@ -73,3 +73,6 @@ All classification summaries, statistical testing logs, and performance metrics 
    - `best_gcn.keras` (Graph module)
    - `gcn_embed.keras` & `temporal_extractor.keras` 
 - **Tabular Biomarkers**: `entropy_biomarkers.csv` is exported with block-level entropy statistical tests and measurements.
+
+##  Note
+#The thing what has to b done next is validation  setup and other criteria for support 
