@@ -1,78 +1,89 @@
-# EEG Full Pipeline: AD/FTD/CN Classification
+# NeuralScan AI: EEG-based Brain Disorder Classification
+*(Major Project)*
 
-This repository contains a comprehensive 6-stage deep learning and graph-theoretic pipeline for analyzing Electroencephalography (EEG) data. It specifically classifies Alzheimer's Disease (AD), Frontotemporal Dementia (FTD), and Cognitively Normal (CN) subjects using the ds006036 dataset.
+NeuralScan AI is a comprehensive, end-to-end Machine Learning pipeline and Full-Stack interactive web application for analyzing Electroencephalography (EEG) data. It predicts and classifies Alzheimer's Disease (AD), Frontotemporal Dementia (FTD), and Cognitively Normal (CN) profiles.
 
 ## Table of Contents
 - [Overview](#overview)
-- [Pipeline Architecture](#pipeline-architecture)
-- [Requirements & Installation](#requirements--installation)
-- [Dataset](#dataset)
-- [Usage](#usage)
-- [Outputs](#outputs)
+- [Web Platform (Full-Stack)](#web-platform-full-stack-)
+  - [Tech Stack](#tech-stack)
+  - [Setup Instructions](#setup-instructions)
+- [Pipeline Architecture (Data Science)](#pipeline-architecture-data-science)
+- [Dataset Requirements](#dataset-requirements)
+- [Outputs & Analytics](#outputs--analytics)
+
+---
 
 ## Overview
-The pipeline combines deep learning and graph theory to extract temporal and spatial insights from EEG recordings. It evaluates not only the accuracy of classification but also functional connectivity, discriminative connectivity biomarkers (like entropy), and lead-time optimization to determine the minimum EEG recording length necessary for an accurate diagnosis.
+This platform bridges rigorous graph-theory and deep learning techniques with a beautifully immersive web interface. By extracting temporal and spatial features from EEG signals, the engine assesses functional connectivity, predictive biomarkers, and lead-time optimization to determine patient diagnosis.
 
-## Pipeline Architecture
-The analysis is divided into 6 distinct stages:
+The system is divided into two primary parts:
+1. **The Core Analytical Engine / Training** (Generates `.keras` model weights) 
+2. **The Full-Stack Web App** (Consumes uploaded `.set` files to dynamically generate diagnostic results).
 
-1. **Stage 1: CNN-BiLSTM Temporal Classifier**
-   - Applies a 1D Convolutional Neural Network followed by a Bidirectional LSTM.
-   - Includes an attention mechanism over electrodes and a parallel band-power feature branch.
-2. **Stage 2: Functional Connectivity Construction**
-   - Generates coherence-based 19x19 adjacency matrices per 4-second EEG segment.
-3. **Stage 3: Graph Convolutional Network (GCN)** 
-   - A 3-layer GCN trained on graph structures where nodes represent band-power and edges represent functional connectivity.
-4. **Stage 4: Connectivity Entropy Biomarker**
-   - Calculates various network disorder metrics, establishing that higher entropy aligns with dementia (AD/FTD) through rigorous statistical tests.
-5. **Stage 5: Temporal–Spatial Coupling Analysis**
-   - Evaluates the correlation between Stage 1's temporal embeddings and Stage 3's graph embeddings using Canonical Correlation Analysis (CCA).
-6. **Stage 6: Early-Warning / Lead-Time Analysis** 
-   - Uses an ensemble of Stage 1 & 3 models to predict diagnosis across increasing time windows (1 to 64 segments) to optimize early diagnosis.
+---
 
-## Requirements & Installation
-Ensure you have Python 3.7+ installed. Run the following command to install the required dependencies:
+## Web Platform (Full-Stack) 🚀
+
+Our newly integrated interactive dashboard accepts EEGLAB (`.set`) files, queries the trained analytical engine, and returns beautifully mapped spatial outputs.
+
+### Tech Stack
+- **Frontend**: React 18, Vite, Tailwind CSS v4, `react-force-graph-2d`, `lucide-react`
+- **Backend API**: FastAPI, Python 3.10+, Uvicorn
+- **AI/DSP Stack**: TensorFlow 2, MNE-Python, SciPy, NumPy
+
+### Setup Instructions
+
+The web application contains a smart **Offline Mock Mode**. If you haven't transferred the large `.keras` model weights over yet, the backend will gracefully simulate inferences so you can develop and test the UI rendering without errors!
+
+#### 1. Start the Backend API
+The backend acts as the gateway to the CNN-BiLSTM and GCN networks.
+
 ```bash
-pip install mne scipy scikit-learn matplotlib seaborn tensorflow networkx
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+*Note: Make sure your trained `best_model.keras` and `best_gcn.keras` files are placed inside the `backend/models/` folder for genuine processing.*
+
+#### 2. Start the Frontend UI
+The frontend renders spatial Topomaps dynamically via Canvas and renders coherence matrices as force-directed 2D networks.
+
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
-*Note: The script is optimized to utilize GPU acceleration via TensorFlow and mixed precision training (e.g., for RTX series graphics cards).*
+Visit the link displayed in your terminal (typically `http://localhost:5173`).
 
-## Dataset
-The project is built to process the **ds006036** dataset (or appropriately structured standard derivatives).
-- Must include a `participants.tsv` file detailing subject diagnosis/grouping.
-- Inside the dataset directory, EEG recordings should be stored as `.set` files under the `eeglab` derivatives or raw `eeg` folders.
+---
 
-Set your dataset path in the `DATA_DIR` variable within the notebook. Example:
-```python
-DATA_DIR = "/kaggle/input/datasets/shivasubrahmanyakc/new-dataset/New Dataset"
-```
+## Pipeline Architecture (Data Science)
 
-## Usage
-The entire pipeline is consolidated into a single Jupyter Notebook (`Major.ipynb`). You can run it sequentially, from top to bottom, either locally or within a Kaggle Notebook environment.
+The engine training process is divided into 6 distinct analytical stages:
 
-1. Clone the repository and install requirements.
-2. Ensure your dataset is downloaded and the `DATA_DIR` path is mapped correctly in Cell 3 of the notebook.
-3. Execute all cells in the Jupyter notebook. It will sequentially process and train the entire 6-stage pipeline.
+1. **Stage 1: CNN-BiLSTM Temporal Classifier**: 1D Convolution + Bi-directional LSTM with Spatial Attention.
+2. **Stage 2: Functional Connectivity Construction**: Generates coherence-based 19x19 adjacency matrices per segment.
+3. **Stage 3: Graph Convolutional Network (GCN)**: 3-layer Graph system where nodes = power bands, edges = coherence.
+4. **Stage 4: Connectivity Entropy Biomarker**: Mathematical network tracking.
+5. **Stage 5: Temporal–Spatial Coupling Analysis**: Canonical Correlation Analysis (CCA) between structural arrays.
+6. **Stage 6: Early-Warning / Lead-Time Analysis**: Dynamic ensemble voting.
 
-*Caching: Intermediate processed chunks, such as segmented signals and adjacency matrices, are saved to `./eeg_cache.npz` and `./conn_cache.npz` to make subsequent test runs significantly faster.*
+## Dataset Requirements
 
-## Outputs
+For training or evaluating against the raw `.set` files, note that:
+- It focuses geometrically on the 10-20 standard 19-Channel layout.
+- Re-samples incoming arrays strictly to 256Hz.
+- Applies standard high-low (0.5Hz - 45Hz) artifact filtration alongside notch filtering at 50Hz.
 
-All classification summaries, statistical testing logs, and performance metrics are logged chronologically during execution.
+## Outputs & Analytics
 
-### Local output artifacts:
-- **`./results/` directory**: Contains all high-resolution generated plots.
-   - Training curves and confusion matrices.
-   - Mean band power and channel attention maps.
-   - GCN tracking.
-   - Entropy biomarker comparisons and CCA scatter plots.
-   - Final trajectory / lead-time accuracy plots.
-- **`./checkpoints/` directory**: Stores best-performing model weights (saved in `.keras` format).
-   - `best_model.keras` (CNN-BiLSTM core)
-   - `best_gcn.keras` (Graph module)
-   - `gcn_embed.keras` & `temporal_extractor.keras` 
-- **Tabular Biomarkers**: `entropy_biomarkers.csv` is exported with block-level entropy statistical tests and measurements.
+**Web Outputs:**
+- **Spatial Attention Topomap**: Color-dense radial distributions identifying highly engaged cranial zones.
+- **Functional Network Graph**: Coherence lines map relationships between discrete channels with visual gravity.
 
-##  Note
-#The thing what has to b done next is validation  setup and other criteria for support 
+**Local Training Artifacts:**
+- `./results/` - Plot caches, attention models, and accuracy matrices.
+- `./checkpoints/` - TensorFlow model state dumps.
+- `./entropy_biomarkers.csv` - Tabular raw readouts for clinical comparison.
