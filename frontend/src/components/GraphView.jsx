@@ -1,4 +1,4 @@
-import { ForceGraph2D } from 'react-force-graph';
+import ForceGraph2D from 'react-force-graph-2d';
 
 const GraphView = ({ graphData }) => {
   if (!graphData || !graphData.nodes || !graphData.edges) {

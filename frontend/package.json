@@ -15,7 +15,7 @@
     "lucide-react": "^1.8.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
-    "react-force-graph": "^1.48.2",
+    "react-force-graph-2d": "^1.29.1",
     "tailwindcss": "^4.2.4"
   },
   "devDependencies": {
