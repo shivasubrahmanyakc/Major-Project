@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+python-multipart
+mne
+tensorflow
+scipy
+numpy
+networkx
