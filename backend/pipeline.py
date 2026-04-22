@@ -3,6 +3,8 @@ import mne
 from scipy.signal import welch, coherence
 import os
 import joblib
+import tensorflow as tf
+
 
 # Create models directory if it doesn't exist
 os.makedirs("models", exist_ok=True)
@@ -25,37 +27,20 @@ BANDS = {
 
 CLASSES = ["AD","CN","FTD"]
 
-# Load model logic with graceful fallback explicitly requested by user
+# Load model logic with graceful fallback
 try:
-    import tensorflow as tf
-    try:
-        model = tf.keras.models.load_model("models/best_model.keras")
-        print("CNN-BiLSTM loaded ✅")
-
-        # Extract attention layer
-        attn_model = tf.keras.Model(
-            inputs=model.input,
-            outputs=model.get_layer("channel_attn").output
-        )
-        MODELS_LOADED = True
-    except Exception as e:
-        print(f"Warning: Could not load CNN-BiLSTM — {str(e)}. Using mock predictions.")
-        MODELS_LOADED = False
-
-    # GCN is optional — ensemble is used when available
-    try:
-        gcn_model = tf.keras.models.load_model("models/best_gcn.keras")
-        GCN_LOADED = True
-        print("GCN loaded ✅  (ensemble mode)")
-    except Exception as e:
-        gcn_model = None
-        GCN_LOADED = False
-        print(f"GCN not loaded — {str(e)}. CNN-only mode.")
-
-except ImportError:
-    print("Warning: TensorFlow not installed. Using mock predictions.")
+    model = tf.keras.models.load_model("models/best_model.keras")
+    print("CNN-BiLSTM loaded ✅")
+    attn_model = tf.keras.Model(
+        inputs=model.input,
+        outputs=model.get_layer("channel_attn").output
+    )
+    MODELS_LOADED = True
+except Exception as e:
+    print(f"Warning: Could not load CNN-BiLSTM — {str(e)}. Using mock predictions.")
     MODELS_LOADED = False
-    GCN_LOADED   = False
+
+
 
 # Load StandardScaler (fitted on training data — fixes distribution mismatch)
 try:
@@ -174,18 +159,8 @@ def run_pipeline(path):
 
     if MODELS_LOADED:
         X_raw_n = _normalise(X_raw)   # apply training scaler
-        pred1 = model.predict([X_raw_n, X_band])          # CNN-BiLSTM: (N, 3)
-
-        if GCN_LOADED:
-            # GCN takes (node_features, adjacency): shapes (N,19,5) and (N,19,19)
-            pred2 = gcn_model.predict([X_band, A_graph])  # GCN: (N, 3)
-            final = (pred1 + pred2) / 2.0
-            print("Ensemble prediction (CNN + GCN) ✅")
-        else:
-            final = pred1
-            print("CNN-only prediction (GCN not loaded)")
-
-        probs = final.mean(axis=0)
+        pred = model.predict([X_raw_n, X_band])   # CNN-BiLSTM: (N, 3)
+        probs = pred.mean(axis=0)
         idx   = int(np.argmax(probs))
 
         # channel attention
