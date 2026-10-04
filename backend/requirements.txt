@@ -6,3 +6,6 @@ tensorflow
 scipy
 numpy
 networkx
+scikit-learn
+joblib
+
