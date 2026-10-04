@@ -1,0 +1,21 @@
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+*.local
+
+# Python / Backend
+__pycache__/
+backend/__pycache__/
+*.py[cod]
+*$py.class
+*.env
+.venv/
+env/
+venv/
+ENV/
+
+# Temporary & Notebook Checkpoints
+.ipynb_checkpoints/
+.DS_Store
+Thumbs.db
