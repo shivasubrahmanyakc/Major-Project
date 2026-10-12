@@ -1,85 +1,76 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import Topomap from '../components/Topomap';
-import GraphView from '../components/GraphView';
+import BrainDashboard from '../components/BrainDashboard';
 
-/* ── helpers ─────────────────────────────────────────────────────── */
+/* ── Class Metadata ── */
 const CLASS_INFO = {
   AD:  {
     fullName: "Alzheimer's Disease",
-    color: '#f43f5e',
-    glow:  'rgba(244,63,94,.3)',
-    bg:    'rgba(244,63,94,.08)',
-    border:'rgba(244,63,94,.25)',
-    icon:  '🔴',
-    description: 'Alzheimer\'s Disease (AD) is a progressive neurodegenerative disorder characterized by tau tangles and amyloid plaques, leading to cognitive decline.',
+    code: 'AD',
+    description: 'Alzheimer\'s Disease (AD) is characterized by neurodegenerative cortical changes resulting in progressive cognitive decline, slowing of dominant background rhythms, and impaired functional interconnectivity.',
     eeg_findings: [
-      'Slowing of dominant alpha rhythm',
-      'Increased delta/theta power in temporal and parietal regions',
-      'Reduced long-range coherence between hemispheres',
-      'Abnormal phase synchronization patterns',
-      'Decreased beta band activity in frontal regions',
+      'Generalized slowing of posterior dominant alpha rhythm (shift toward theta)',
+      'Marked increase in spectral delta/theta power across temporo-parietal leads',
+      'Loss of long-range inter-hemispheric coherence and phase locking',
+      'Reduced fast beta-band synchronization over associative neocortex',
+      'Decreased non-linear complexity and signal entropy in continuous EEG',
     ],
   },
   FTD: {
     fullName: 'Frontotemporal Dementia',
-    color: '#f59e0b',
-    glow:  'rgba(245,158,11,.3)',
-    bg:    'rgba(245,158,11,.08)',
-    border:'rgba(245,158,11,.25)',
-    icon:  '🟠',
-    description: 'Frontotemporal Dementia (FTD) involves progressive degeneration of the frontal and temporal lobes, affecting behavior, personality and language.',
+    code: 'FTD',
+    description: 'Frontotemporal Dementia (FTD) involves focal progressive atrophy localized primarily in the frontal and anterior temporal regions, affecting executive control and behavioral circuits.',
     eeg_findings: [
-      'Prominent frontal slow-wave activity',
-      'Disrupted fronto-temporal connectivity',
-      'Irregular gamma band synchronization',
-      'Reduced signal stability across channels',
-      'Altered mu rhythm over motor cortex',
+      'Prominent anterior slow-wave (theta/delta) excess over fronto-central channels',
+      'Selective disruption of fronto-temporal connectivity pathways',
+      'Atypical gamma-band power distribution reflecting altered cortical excitation',
+      'Relative preservation of occipital alpha reactivity in early stages',
+      'Reduced temporal variability in oscillatory burst patterns',
     ],
   },
   CN:  {
     fullName: 'Cognitively Normal',
-    color: '#10b981',
-    glow:  'rgba(16,185,129,.3)',
-    bg:    'rgba(16,185,129,.08)',
-    border:'rgba(16,185,129,.25)',
-    icon:  '🟢',
-    description: 'The EEG pattern is consistent with normal cognitive function, showing organized rhythms, strong connectivity, and healthy synchronization across all brain regions.',
+    code: 'CN',
+    description: 'The recording exhibits preserved neurophysiological architecture consistent with healthy aging, characterized by strong rhythmic synchronization and robust functional connectivity.',
     eeg_findings: [
-      'Well-organized posterior alpha rhythm (8–13 Hz)',
-      'Strong fronto-occipital coherence',
-      'Normal beta activity during resting state',
-      'Low delta/theta power (no pathological slowing)',
-      'Healthy long-range neural synchronization',
+      'Well-organized, reactive posterior dominant alpha rhythm (8–13 Hz)',
+      'Intact fronto-occipital and inter-hemispheric functional coherence',
+      'Normal beta-band distribution during alert eyes-closed resting state',
+      'Minimal delta/theta slow-wave intrusion outside expected physiological bounds',
+      'Preserved complex temporal dynamics and high phase-lag index',
     ],
   },
 };
 
 const HEAD_INFO = {
-  fusion:   { label: 'Fusion Head',   color: '#22d3ee', desc: 'Combined temporal + graph (headline model)' },
-  temporal: { label: 'Temporal Head', color: '#818cf8', desc: 'EEGNet-style multi-scale CNN' },
-  graph:    { label: 'Graph Head',    color: '#a78bfa', desc: 'Chebyshev GCN over coherence graph' },
+  fusion:   { label: 'Fusion Model',   desc: 'Unified temporal + graph ensemble (headline prediction)' },
+  temporal: { label: 'Temporal CNN',   desc: 'Multi-scale spatial-temporal convolutional network' },
+  graph:    { label: 'Chebyshev GCN',  desc: 'Spectral graph convolutional network over coherence' },
 };
 
-function ProbBar({ label, value, color, highlight }) {
+function ProbBar({ label, value, highlight }) {
   return (
-    <div style={{ marginBottom: 10 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-        <span style={{ fontSize: 12, fontWeight: highlight ? 700 : 500, color: highlight ? color : '#94a3b8' }}>
+    <div style={{ marginBottom: 12 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+        <span style={{ fontSize: 13, fontWeight: highlight ? 600 : 400, color: highlight ? '#14161A' : '#6B7078' }}>
           {label}
         </span>
-        <span style={{ fontSize: 13, fontWeight: 700, color: highlight ? color : '#64748b' }}>
+        <span style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: 12,
+          fontWeight: 600,
+          color: highlight ? '#84512E' : '#6B7078',
+        }}>
           {(value * 100).toFixed(1)}%
         </span>
       </div>
-      <div style={{ height: 6, borderRadius: 9999, background: 'rgba(99,129,255,.1)', overflow: 'hidden' }}>
+      <div style={{ height: 5, borderRadius: 3, background: '#D9D2C5', overflow: 'hidden' }}>
         <div style={{
-          height: '100%', borderRadius: 9999,
-          background: highlight ? color : 'rgba(99,129,255,.25)',
+          height: '100%', borderRadius: 3,
+          background: highlight ? '#84512E' : '#A89F90',
           width: `${value * 100}%`,
-          transition: 'width 1.2s cubic-bezier(.4,0,.2,1)',
-          boxShadow: highlight ? `0 0 8px ${color}` : 'none',
+          transition: 'width 0.8s ease',
         }} />
       </div>
     </div>
@@ -92,28 +83,39 @@ function HeadCard({ headKey, probs }) {
   const winner = entries[0][0];
   return (
     <div style={{
-      background: 'rgba(8,13,26,.7)',
-      border: `1px solid rgba(99,129,255,.12)`,
-      borderRadius: 16, padding: 20,
-      flex: 1, minWidth: 0,
+      background: '#FAF6F0',
+      border: '1px solid #D8D1C4',
+      borderRadius: 8, padding: 18,
+      flex: 1, minWidth: 260,
     }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 4 }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: hi.color }}>{hi.label}</span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+        <h4 style={{
+          fontFamily: 'var(--font-serif)',
+          fontSize: 17,
+          fontWeight: 600,
+          color: '#14161A',
+          margin: 0,
+        }}>
+          {hi.label}
+        </h4>
         <span style={{
-          fontSize: 10, padding: '2px 8px', borderRadius: 9999,
-          background: `${hi.color}18`, border: `1px solid ${hi.color}40`,
-          color: hi.color, fontWeight: 600,
-        }}>{winner}</span>
+          fontFamily: 'var(--font-mono)',
+          fontSize: 11, padding: '2px 8px', borderRadius: 4,
+          background: '#F3EDE3', border: '1px solid #D8D1C4',
+          color: '#84512E', fontWeight: 600,
+        }}>
+          {winner}
+        </span>
       </div>
-      <p style={{ fontSize: 11, color: '#475569', marginBottom: 14 }}>{hi.desc}</p>
+      <p style={{ fontSize: 12, color: '#6B7078', marginBottom: 14 }}>{hi.desc}</p>
       {entries.map(([cls, prob]) => (
-        <ProbBar key={cls} label={cls} value={prob} color={hi.color} highlight={cls === winner} />
+        <ProbBar key={cls} label={cls} value={prob} highlight={cls === winner} />
       ))}
     </div>
   );
 }
 
-/* ── Main ── */
+/* ── Main Result Page ── */
 export default function ResultPage() {
   const { state: results } = useLocation();
   const navigate = useNavigate();
@@ -122,9 +124,17 @@ export default function ResultPage() {
   if (!results) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center', color: '#64748b' }}>
-          <p style={{ fontSize: 18, marginBottom: 16 }}>No result data available.</p>
-          <button onClick={() => navigate('/')} style={btnStyle('#22d3ee')}>← Back to Upload</button>
+        <div style={{ textAlign: 'center', color: '#6B7078' }}>
+          <p style={{ fontSize: 16, marginBottom: 14 }}>No result data available.</p>
+          <button
+            onClick={() => navigate('/')}
+            style={{
+              padding: '8px 18px', borderRadius: 6, cursor: 'pointer',
+              background: '#84512E', border: 'none', color: '#FFFFFF', fontSize: 13, fontWeight: 500,
+            }}
+          >
+            ← Back to Upload
+          </button>
         </div>
       </div>
     );
@@ -132,176 +142,263 @@ export default function ResultPage() {
 
   const info = CLASS_INFO[results.prediction] || CLASS_INFO.CN;
   const fusionProbs = results.probabilities?.fusion || {};
-  const TABS = ['overview', 'heads', 'brain-map'];
+  const TABS = [
+    { id: 'overview', label: 'Summary Overview' },
+    { id: 'heads',    label: 'Head Probabilities' },
+    { id: 'brain-map',label: 'Brain Mapping' },
+  ];
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <Navbar />
-      <main style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px 80px' }}>
+      <main style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(2.5rem, 4vw, 4rem) 24px 80px' }}>
 
-        {/* ── Prediction hero card ── */}
-        <div style={{
-          borderRadius: 24,
-          background: `linear-gradient(135deg, ${info.bg}, rgba(8,13,26,.9))`,
-          border: `1px solid ${info.border}`,
-          padding: '36px 40px',
-          marginBottom: 24,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          flexWrap: 'wrap', gap: 24,
-          boxShadow: `0 0 60px ${info.glow}`,
-          position: 'relative', overflow: 'hidden',
-        }}>
-          {/* Background decorative blur */}
+        {/* ── Editorial Header (SapientPriors Style) ── */}
+        <div style={{ marginBottom: 36 }} className="animate-fade-up">
+          <p style={{
+            margin: '0 0 16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            fontFamily: "var(--font-mono)",
+            fontWeight: 500,
+            fontSize: '0.8125rem',
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            color: '#6B7078',
+          }}>
+            Classification Output • 5-Seed Ensemble
+            <span style={{ height: 1, flex: 1, background: '#D9D2C5' }} />
+          </p>
+
           <div style={{
-            position: 'absolute', top: -60, right: -60,
-            width: 200, height: 200, borderRadius: '50%',
-            background: info.color, opacity: 0.06,
-            filter: 'blur(60px)', pointerEvents: 'none',
-          }} />
-
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{
-              fontSize: 11, fontWeight: 700, color: info.color,
-              letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8,
-            }}>
-              EEG Classification Result
-            </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, flexWrap: 'wrap' }}>
-              <h1 style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: 56, fontWeight: 900, lineHeight: 1,
-                color: info.color,
-                textShadow: `0 0 40px ${info.glow}`,
-              }}>
-                {results.prediction}
-              </h1>
-              <div>
-                <p style={{ fontSize: 20, fontWeight: 600, color: '#e2e8f0' }}>{info.fullName}</p>
-                <div style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 4,
-                  padding: '4px 12px', borderRadius: 9999,
-                  background: `${info.color}18`, border: `1px solid ${info.color}40`,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'baseline',
+            flexWrap: 'wrap',
+            gap: 20,
+          }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, flexWrap: 'wrap', marginBottom: 8 }}>
+                <h1 style={{
+                  margin: 0,
+                  fontFamily: "var(--font-serif)",
+                  fontWeight: 400,
+                  fontSize: 'clamp(2.5rem, 1.2rem + 3vw, 4rem)',
+                  lineHeight: 1.05,
+                  letterSpacing: '-0.025em',
+                  color: '#14161A',
                 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: info.color, boxShadow: `0 0 6px ${info.color}` }} />
-                  <span style={{ fontSize: 13, color: info.color, fontWeight: 600 }}>
-                    {(results.confidence * 100).toFixed(1)}% Confidence (Fusion Head)
+                  {info.fullName}
+                </h1>
+                <span style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 18,
+                  fontWeight: 600,
+                  color: '#84512E',
+                  letterSpacing: '0.04em',
+                }}>
+                  ({results.prediction})
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '4px 10px', borderRadius: 6,
+                  background: '#FAF6F0', border: '1px solid #D8D1C4',
+                  fontFamily: 'var(--font-mono)', fontSize: 12, color: '#84512E', fontWeight: 600,
+                }}>
+                  {(results.confidence * 100).toFixed(1)}% CONFIDENCE (FUSION)
+                </span>
+
+                <span style={{
+                  padding: '4px 10px', borderRadius: 6,
+                  background: '#F3EDE3', border: '1px solid #D8D1C4',
+                  fontFamily: 'var(--font-mono)', fontSize: 11, color: '#6B7078',
+                }}>
+                  RECORDING: EEG SIGNALS
+                </span>
+                {results.windows_used && Object.entries(results.windows_used).map(([k, v]) => (
+                  <span key={k} style={{
+                    padding: '4px 10px', borderRadius: 6,
+                    background: '#F3EDE3', border: '1px solid #D8D1C4',
+                    fontFamily: 'var(--font-mono)', fontSize: 11, color: '#6B7078',
+                  }}>
+                    {k === 'rest' ? 'EEG Signals' : k}: {v} windows
                   </span>
-                </div>
+                ))}
               </div>
             </div>
 
-            {/* Inputs used */}
-            <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {results.inputs_used && (
-                <span style={{
-                  padding: '3px 10px', borderRadius: 9999, fontSize: 11, fontWeight: 500,
-                  background: 'rgba(99,129,255,.1)', border: '1px solid rgba(99,129,255,.2)', color: '#818cf8',
-                }}>
-                  Inputs: {results.inputs_used}
-                </span>
-              )}
-              {results.windows_used && Object.entries(results.windows_used).map(([k, v]) => (
-                <span key={k} style={{
-                  padding: '3px 10px', borderRadius: 9999, fontSize: 11, fontWeight: 500,
-                  background: 'rgba(34,211,238,.06)', border: '1px solid rgba(34,211,238,.15)', color: '#67e8f9',
-                }}>
-                  {k}: {v} windows
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-end' }}>
             <button
               onClick={() => navigate('/')}
               style={{
-                padding: '10px 20px', borderRadius: 12, cursor: 'pointer',
-                background: 'rgba(99,129,255,.1)', border: '1px solid rgba(99,129,255,.25)',
-                color: '#818cf8', fontSize: 13, fontWeight: 600,
+                padding: '8px 18px', borderRadius: 6, cursor: 'pointer',
+                background: '#FAF6F0', border: '1px solid #D8D1C4',
+                color: '#14161A', fontSize: 13, fontWeight: 500,
+                fontFamily: 'var(--font-sans)',
                 display: 'flex', alignItems: 'center', gap: 6,
+                transition: 'all .15s ease',
               }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#FFFFFF'; e.currentTarget.style.borderColor = '#B8AFA0'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = '#FAF6F0'; e.currentTarget.style.borderColor = '#D8D1C4'; }}
             >
-              ↩ New Analysis
+              ← New Analysis
             </button>
           </div>
         </div>
 
-        {/* ── Tabs ── */}
-        <div style={{ display: 'flex', gap: 4, marginBottom: 24, background: 'rgba(8,13,26,.6)', padding: 4, borderRadius: 14, width: 'fit-content', border: '1px solid rgba(99,129,255,.1)' }}>
-          {TABS.map(t => (
-            <button key={t} onClick={() => setActiveTab(t)} style={{
-              padding: '8px 20px', borderRadius: 10, border: 'none', cursor: 'pointer',
-              fontSize: 13, fontWeight: 600, transition: 'all .2s',
-              background: activeTab === t ? 'rgba(34,211,238,.12)' : 'transparent',
-              color: activeTab === t ? '#22d3ee' : '#64748b',
-              boxShadow: activeTab === t ? '0 0 12px rgba(34,211,238,.15)' : 'none',
-            }}>
-              {t === 'overview' ? '📋 Overview' : t === 'heads' ? '🔍 Head Probabilities' : '🧠 Brain Map'}
-            </button>
-          ))}
+        {/* ── View Navigation Tabs ── */}
+        <div style={{
+          display: 'flex', gap: 6, marginBottom: 24,
+          borderBottom: '1px solid #D9D2C5',
+          paddingBottom: 2,
+        }}>
+          {TABS.map(t => {
+            const active = activeTab === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setActiveTab(t.id)}
+                style={{
+                  padding: '8px 16px',
+                  background: 'transparent',
+                  border: 'none',
+                  borderBottom: active ? '2px solid #84512E' : '2px solid transparent',
+                  cursor: 'pointer',
+                  fontSize: 13,
+                  fontWeight: active ? 600 : 400,
+                  fontFamily: 'var(--font-sans)',
+                  color: active ? '#84512E' : '#6B7078',
+                  transition: 'all .15s ease',
+                }}
+              >
+                {t.label}
+              </button>
+            );
+          })}
         </div>
 
-        {/* ── Overview tab ── */}
+        {/* ── Overview Tab ── */}
         {activeTab === 'overview' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}
-            className="animate-fade-in">
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 20 }} className="animate-fade-in">
 
-            {/* Description */}
+            {/* Diagnostic Profile card */}
             <div style={{
-              background: 'rgba(8,13,26,.7)', border: '1px solid rgba(99,129,255,.1)',
-              borderRadius: 20, padding: 28, gridColumn: '1 / -1',
+              background: '#FAF6F0', border: '1px solid #D8D1C4',
+              borderRadius: 8, padding: 24, gridColumn: '1 / -1',
             }}>
-              <h3 style={{ fontSize: 15, fontWeight: 700, color: '#e2e8f0', marginBottom: 10 }}>
-                {info.icon} About this Diagnosis
+              <span style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: '#84512E',
+                display: 'block',
+                marginBottom: 6,
+              }}>
+                Diagnostic Profile
+              </span>
+              <h3 style={{
+                fontFamily: 'var(--font-serif)',
+                fontSize: 22,
+                fontWeight: 600,
+                color: '#14161A',
+                marginBottom: 8,
+              }}>
+                {info.fullName} Pathophysiological Signatures
               </h3>
-              <p style={{ fontSize: 14, color: '#94a3b8', lineHeight: 1.7 }}>{info.description}</p>
+              <p style={{ fontSize: 14, color: '#3A3E45', lineHeight: 1.6, margin: 0 }}>
+                {info.description}
+              </p>
             </div>
 
-            {/* EEG findings */}
+            {/* EEG Biomarkers */}
             <div style={{
-              background: 'rgba(8,13,26,.7)', border: '1px solid rgba(99,129,255,.1)',
-              borderRadius: 20, padding: 28,
+              background: '#FAF6F0', border: '1px solid #D8D1C4',
+              borderRadius: 8, padding: 24,
             }}>
-              <h3 style={{ fontSize: 15, fontWeight: 700, color: '#e2e8f0', marginBottom: 14 }}>
-                EEG Biomarkers Detected
+              <span style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: '#84512E',
+                display: 'block',
+                marginBottom: 6,
+              }}>
+                Identified Correlates
+              </span>
+              <h3 style={{
+                fontFamily: 'var(--font-serif)',
+                fontSize: 20,
+                fontWeight: 600,
+                color: '#14161A',
+                marginBottom: 14,
+              }}>
+                Electroencephalographic Markers
               </h3>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10, padding: 0 }}>
                 {info.eeg_findings.map((f, i) => (
-                  <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: '#94a3b8' }}>
-                    <span style={{ color: info.color, marginTop: 2, flexShrink: 0 }}>▸</span>
+                  <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: '#3A3E45', lineHeight: 1.5 }}>
+                    <span style={{ color: '#84512E', fontWeight: 700, flexShrink: 0 }}>•</span>
                     {f}
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* Fusion probabilities */}
+            {/* Fusion distribution */}
             <div style={{
-              background: 'rgba(8,13,26,.7)', border: '1px solid rgba(99,129,255,.1)',
-              borderRadius: 20, padding: 28,
+              background: '#FAF6F0', border: '1px solid #D8D1C4',
+              borderRadius: 8, padding: 24,
             }}>
-              <h3 style={{ fontSize: 15, fontWeight: 700, color: '#e2e8f0', marginBottom: 14 }}>
-                Fusion Head Probabilities
+              <span style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: '#84512E',
+                display: 'block',
+                marginBottom: 6,
+              }}>
+                Ensemble Likelihood
+              </span>
+              <h3 style={{
+                fontFamily: 'var(--font-serif)',
+                fontSize: 20,
+                fontWeight: 600,
+                color: '#14161A',
+                marginBottom: 14,
+              }}>
+                Class Posterior Distribution
               </h3>
               {Object.entries(fusionProbs)
                 .sort((a, b) => b[1] - a[1])
                 .map(([cls, prob]) => (
-                  <ProbBar key={cls} label={CLASS_INFO[cls]?.fullName || cls}
-                    value={prob} color={CLASS_INFO[cls]?.color || '#818cf8'}
-                    highlight={cls === results.prediction} />
+                  <ProbBar
+                    key={cls}
+                    label={`${cls} — ${CLASS_INFO[cls]?.fullName || cls}`}
+                    value={prob}
+                    highlight={cls === results.prediction}
+                  />
                 ))}
-              <p style={{ fontSize: 11, color: '#475569', marginTop: 12 }}>
-                Fusion = averaged log-probabilities across both conditions and all 5 seeds.
+              <p style={{ fontSize: 11, color: '#6B7078', marginTop: 14, lineHeight: 1.4 }}>
+                Averaged in log-probability space over 5 random initialization seeds.
               </p>
             </div>
           </div>
         )}
 
-        {/* ── Head Probabilities tab ── */}
+        {/* ── Head Probabilities Tab ── */}
         {activeTab === 'heads' && (
           <div className="animate-fade-in">
-            <p style={{ fontSize: 13, color: '#64748b', marginBottom: 20 }}>
-              Each head independently classifies from a different learned representation. Their outputs are averaged in log-probability space.
+            <p style={{ fontSize: 13, color: '#6B7078', marginBottom: 16 }}>
+              Independent posterior predictions from multi-scale temporal convolutions and Chebyshev spectral graph networks:
             </p>
             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
               {results.probabilities && Object.entries(results.probabilities).map(([head, probs]) => (
@@ -311,37 +408,21 @@ export default function ResultPage() {
           </div>
         )}
 
-        {/* ── Brain Map tab ── */}
+        {/* ── Brain Map Tab ── */}
         {activeTab === 'brain-map' && (
-          <div className="animate-fade-in">
-            <p style={{ fontSize: 13, color: '#64748b', marginBottom: 20 }}>
-              Spatial attention (channel importance from mean node-feature magnitude) and functional connectivity graph from spectral coherence.
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-              <Topomap attentionVals={results.graph?.nodes} />
-              <GraphView graphData={results.graph} />
-            </div>
-          </div>
+          <BrainDashboard graphData={results.graph} prediction={results.prediction} />
         )}
 
-        {/* ── Disclaimer ── */}
+        {/* Disclaimer */}
         <div style={{
-          marginTop: 32, padding: '14px 20px',
-          background: 'rgba(244,63,94,.04)',
-          border: '1px solid rgba(244,63,94,.12)',
-          borderRadius: 12, fontSize: 12, color: '#64748b', textAlign: 'center',
+          marginTop: 40, padding: '14px 18px',
+          background: '#F3EDE3',
+          border: '1px solid #D8D1C4',
+          borderRadius: 6, fontSize: 12, color: '#6B7078', textAlign: 'center', lineHeight: 1.5,
         }}>
-          ⚠️ This system is a <strong style={{ color: '#94a3b8' }}>research prototype</strong> only and is not validated for clinical use. Do not use for medical diagnosis.
+          Research demonstration. All inferences represent computational model estimates and must not be used as standalone clinical diagnostics.
         </div>
       </main>
     </div>
   );
-}
-
-function btnStyle(color) {
-  return {
-    padding: '10px 24px', borderRadius: 10, cursor: 'pointer',
-    background: `${color}18`, border: `1px solid ${color}40`,
-    color, fontSize: 14, fontWeight: 600,
-  };
 }

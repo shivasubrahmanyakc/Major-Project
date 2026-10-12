@@ -117,12 +117,12 @@ def _run_inference(rest_path: Optional[str], photic_path: Optional[str]):
     ch_importance = np.abs(Xn_mean).mean(-1)
     ch_importance = (ch_importance / (ch_importance.max() + 1e-8)).tolist()
 
-    # graph edges (threshold > 0.4)
+    # graph edges (threshold > 0.2 to capture full connectivity structure)
     edges = []
     for i in range(len(CHANNELS)):
         for j in range(i + 1, len(CHANNELS)):
             w = float(A_mean[i, j])
-            if w > 0.4:
+            if w > 0.2:
                 edges.append({"source": i, "target": j, "weight": round(w, 4)})
 
     nodes = [

@@ -3,140 +3,176 @@ import Navbar from '../components/Navbar';
 
 const PHASES = [
   {
-    icon: '📂', title: 'Phase 1 — EEG Loading',
+    tag: 'PHASE 01', title: 'Continuous EEG Signal Ingestion & Filtering',
     items: [
-      'Reads .set / .edf / .fif / .vhdr files via MNE',
-      'Maps all channel names to 19 standard 10-20 electrodes',
-      '50 Hz notch filter + 0.5–45 Hz band-pass (raw recordings)',
-      'Common average re-referencing',
-      'Resamples to 128 Hz',
+      'Reads .set, .edf, .fif, and .vhdr neurophysiological recordings using MNE-Python.',
+      'Aligns recording channels to the standardized 19-channel 10-20 international montage.',
+      'Applies 50 Hz notch filter and 0.5–45 Hz band-pass filter to raw potentials.',
+      'Performs common average re-referencing (CAR) across active scalp sensors.',
+      'Resamples continuous data to 128 Hz uniform temporal resolution.',
     ],
   },
   {
-    icon: '⚡', title: 'Phase 2 — Windowing & Artifact Rejection',
+    tag: 'PHASE 02', title: 'Epoch Segmentation & Artifact Rejection',
     items: [
-      '4-second windows (512 samples) with 50% overlap',
-      'Amplitude threshold: windows > ±150 μV are discarded',
-      'Z-score normalization per channel per recording',
-      'Requires ≥ 20 clean windows for reliable prediction',
+      'Partitions raw continuous traces into 4-second epochs (512 samples) with 50% overlap.',
+      'Applies strict amplitude thresholding: epochs exceeding ±150 μV are discarded.',
+      'Performs channel-wise z-score standardization per recording session.',
+      'Requires a minimum of 20 clean windows to guarantee statistical reliability.',
     ],
   },
   {
-    icon: '📊', title: 'Phase 3 — Feature Extraction',
+    tag: 'PHASE 03', title: 'Spectral & Coherence Graph Feature Extraction',
     items: [
-      '16 node features per channel: log relative band powers (δ, θ, α, β, γ), ratio features, spectral entropy, peak alpha frequency, Hjorth mobility & complexity',
-      'Coherence graph (19×19): cross-spectral coherence across 5 frequency bands',
-      'Node features normalised by training set statistics (norm_final.npz)',
+      'Computes 16 node features per channel: log relative band powers (δ, θ, α, β, γ), band ratios, spectral entropy, peak alpha frequency, and Hjorth mobility/complexity.',
+      'Constructs 19×19 cross-spectral coherence matrices across canonical EEG bands.',
+      'Normalizes node features using precomputed empirical training set distributions.',
     ],
   },
   {
-    icon: '🔗', title: 'Phase 4 — Graph Neural Network (GCN)',
+    tag: 'PHASE 04', title: 'Chebyshev Spectral Graph Convolution (GCN)',
     items: [
-      'Top-k (k=8) coherence-graph sparsification',
-      'Symmetric normalisation → Chebyshev GCN (K=3)',
-      'Two ChebConv blocks (32→64 units) with skip connections',
-      'Global average + max pooling → 64-dim graph embedding',
+      'Sparsifies coherence graphs using top-k (k=8) nearest-neighbor edge thresholding.',
+      'Applies Chebyshev polynomial graph filters (order K=3) over normalized Laplacian.',
+      'Executes two residual ChebConv blocks (32 → 64 units) with skip connections.',
+      'Dual global average and global max pooling produce 64-dimensional graph embeddings.',
     ],
   },
   {
-    icon: '🧠', title: 'Phase 5 — Temporal Encoder (EEGNet-style)',
+    tag: 'PHASE 05', title: 'Multi-Scale Temporal Convolutional Encoder',
     items: [
-      'Multi-scale spatial convolutions: kernels 16, 32, 64 × depthwise',
-      'Square activation → average pooling → log-clip → BN',
-      'Global average + std pooling → 64-dim temporal embedding',
-      'Condition one-hot (rest=[1,0] / photic=[0,1]) concatenated to both heads',
+      'Processes raw waveform epochs via multi-scale temporal kernel convolutions (16, 32, 64).',
+      'Depthwise spatial filtering captures cross-electrode phase and amplitude patterns.',
+      'Square activation, average pooling, and batch normalization extract rhythmic power envelopes.',
+      'Global pooling yields 64-dimensional temporal latent representation vectors.',
     ],
   },
   {
-    icon: '✨', title: 'Phase 6 — 5-Seed Ensemble & Fusion',
+    tag: 'PHASE 06', title: '5-Seed Ensemble Fusion & Decision Rules',
     items: [
-      '5 independently-trained models (seeds 0–4) trained on all subjects',
-      'Three classification heads: fusion, temporal, graph',
-      'Window probabilities averaged in log-probability space per condition',
-      'Conditions averaged → softmax → final class probabilities',
-      'Headline model: fusion head (rest + photic combined)',
+      'Ensemble integrates 5 independently trained model seeds to reduce prediction variance.',
+      'Evaluates fusion, temporal CNN, and graph convolutional classification heads.',
+      'Aggregates segment posteriors in log-probability space across available conditions.',
+      'Computes final class likelihoods via calibrated softmax output distribution.',
     ],
   },
 ];
 
 const METRICS = [
-  { label: 'Parameters', value: '57,873', sub: 'total model weights' },
-  { label: 'Temporal', value: '8,624', sub: 'encoder parameters' },
-  { label: 'Graph', value: '31,704', sub: 'GCN parameters' },
-  { label: 'Ensemble', value: '5 seeds', sub: 'independent models' },
-  { label: 'Window', value: '4 s / 128 Hz', sub: '512 samples' },
-  { label: 'Channels', value: '19', sub: '10-20 standard' },
+  { label: 'Total Parameters', value: '57,873', sub: 'learnable weights' },
+  { label: 'Temporal Encoder', value: '8,624', sub: 'CNN parameters' },
+  { label: 'Graph GCN', value: '31,704', sub: 'Chebyshev weights' },
+  { label: 'Ensemble Seeds', value: '5 Seeds', sub: 'independent runs' },
+  { label: 'Window Length', value: '4 s (512)', sub: 'at 128 Hz sampling' },
+  { label: 'Montage', value: '19 Channels', sub: '10-20 standard' },
 ];
 
 export default function AboutPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <Navbar />
-      <main style={{ maxWidth: 1000, margin: '0 auto', padding: '60px 24px 80px' }}>
+      <main style={{ maxWidth: 1080, margin: '0 auto', padding: 'clamp(3rem, 5vw, 5rem) 24px 80px' }}>
 
-        {/* Header */}
-        <div style={{ marginBottom: 48 }} className="animate-fade-up">
-          <h1 style={{
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: 40, fontWeight: 800, color: '#e2e8f0', marginBottom: 12,
+        {/* Editorial Header */}
+        <div style={{ marginBottom: 44 }} className="animate-fade-up">
+          <p style={{
+            margin: '0 0 20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            fontFamily: "var(--font-mono)",
+            fontWeight: 500,
+            fontSize: '0.8125rem',
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            color: '#6B7078',
           }}>
-            How <span className="brand-text">NeuralScan AI</span> Works
+            Technical Architecture
+            <span style={{ height: 1, flex: 1, background: '#D9D2C5' }} />
+          </p>
+
+          <h1 style={{
+            margin: '0 0 20px',
+            maxWidth: '48rem',
+            fontFamily: "var(--font-serif)",
+            fontWeight: 400,
+            fontSize: 'clamp(2.4rem, 1.2rem + 3.8vw, 4.4rem)',
+            lineHeight: 1.05,
+            letterSpacing: '-0.025em',
+            color: '#14161A',
+          }}>
+            The computational models behind NeuralScan.
           </h1>
-          <p style={{ fontSize: 16, color: '#94a3b8', lineHeight: 1.7, maxWidth: 680 }}>
-            A lightweight Temporal + Graph Neural Network ensemble for 3-class EEG-based dementia classification.
-            Trained on the openly available AD/FTD/CN dataset (19-channel eyes-closed rest + photic stimulation).
+
+          <p style={{
+            margin: 0,
+            maxWidth: '42rem',
+            fontFamily: "var(--font-sans)",
+            fontSize: 'clamp(1.05rem, 0.98rem + 0.3vw, 1.25rem)',
+            lineHeight: 1.6,
+            color: '#3A3E45',
+          }}>
+            A multimodal ensemble coupling temporal waveform encoders and spectral Chebyshev graph convolutional networks trained across Alzheimer's Disease (AD), Frontotemporal Dementia (FTD), and Cognitively Normal (CN) cohorts.
           </p>
         </div>
 
-        {/* Model metrics */}
+        {/* Model Metrics */}
         <div style={{
           display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-          gap: 12, marginBottom: 48,
+          gap: 12, marginBottom: 40,
         }}>
           {METRICS.map((m, i) => (
             <div key={i} style={{
-              background: 'rgba(8,13,26,.8)', border: '1px solid rgba(99,129,255,.12)',
-              borderRadius: 16, padding: '18px 16px', textAlign: 'center',
+              background: '#FAF6F0', border: '1px solid #D8D1C4',
+              borderRadius: 8, padding: '16px 14px', textAlign: 'center',
             }}>
               <div style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: 20, fontWeight: 800,
-                background: 'linear-gradient(135deg, #22d3ee, #818cf8)',
-                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+                fontFamily: "var(--font-mono)",
+                fontSize: 18, fontWeight: 700,
+                color: '#84512E',
                 marginBottom: 4,
-              }}>{m.value}</div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#e2e8f0', marginBottom: 2 }}>{m.label}</div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>{m.sub}</div>
+              }}>
+                {m.value}
+              </div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#14161A', marginBottom: 2 }}>{m.label}</div>
+              <div style={{ fontSize: 11, color: '#6B7078' }}>{m.sub}</div>
             </div>
           ))}
         </div>
 
-        {/* Pipeline phases */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {/* Pipeline Phases */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {PHASES.map((phase, i) => (
             <div key={i} style={{
-              background: 'rgba(8,13,26,.7)',
-              border: '1px solid rgba(99,129,255,.1)',
-              borderRadius: 20, padding: '24px 28px',
-              transition: 'border-color .2s',
-            }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(99,129,255,.25)'}
-              onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(99,129,255,.1)'}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                <span style={{ fontSize: 22 }}>{phase.icon}</span>
+              background: '#FAF6F0',
+              border: '1px solid #D8D1C4',
+              borderRadius: 8, padding: '22px 26px',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 12 }}>
+                <span style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.6875rem',
+                  fontWeight: 600,
+                  letterSpacing: '0.12em',
+                  color: '#84512E',
+                }}>
+                  {phase.tag}
+                </span>
                 <h2 style={{
-                  fontFamily: "'Space Grotesk', sans-serif",
-                  fontSize: 16, fontWeight: 700, color: '#e2e8f0',
-                }}>{phase.title}</h2>
+                  fontFamily: 'var(--font-serif)',
+                  fontSize: 18, fontWeight: 600, color: '#14161A',
+                  margin: 0,
+                }}>
+                  {phase.title}
+                </h2>
               </div>
-              <ul style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: 8, margin: 0, padding: 0, listStyle: 'none' }}>
                 {phase.items.map((item, j) => (
                   <li key={j} style={{
-                    display: 'flex', alignItems: 'flex-start', gap: 10,
-                    fontSize: 13, color: '#94a3b8', lineHeight: 1.6,
+                    display: 'flex', alignItems: 'flex-start', gap: 8,
+                    fontSize: 13, color: '#3A3E45', lineHeight: 1.5,
                   }}>
-                    <span style={{ color: '#22d3ee', marginTop: 3, flexShrink: 0, fontSize: 10 }}>◆</span>
+                    <span style={{ color: '#84512E', flexShrink: 0, marginTop: 1 }}>•</span>
                     {item}
                   </li>
                 ))}
@@ -145,38 +181,14 @@ export default function AboutPage() {
           ))}
         </div>
 
-        {/* Classes */}
-        <div style={{ marginTop: 32, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
-          {[
-            { code: 'AD',  name: "Alzheimer's Disease",    color: '#f43f5e', note: 'Progressive neurodegeneration with amyloid plaques' },
-            { code: 'FTD', name: 'Frontotemporal Dementia',color: '#f59e0b', note: 'Frontal/temporal lobe degeneration affecting behavior' },
-            { code: 'CN',  name: 'Cognitively Normal',     color: '#10b981', note: 'Healthy baseline — organized rhythms, strong connectivity' },
-          ].map(cls => (
-            <div key={cls.code} style={{
-              background: `${cls.color}08`, border: `1px solid ${cls.color}25`,
-              borderRadius: 16, padding: '18px 20px',
-            }}>
-              <div style={{
-                display: 'inline-block', padding: '2px 12px', borderRadius: 9999,
-                background: `${cls.color}18`, border: `1px solid ${cls.color}40`,
-                fontSize: 14, fontWeight: 800, color: cls.color, marginBottom: 8,
-              }}>{cls.code}</div>
-              <p style={{ fontSize: 14, fontWeight: 600, color: '#e2e8f0', marginBottom: 6 }}>{cls.name}</p>
-              <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>{cls.note}</p>
-            </div>
-          ))}
-        </div>
-
         {/* Disclaimer */}
         <div style={{
           marginTop: 40, padding: '16px 20px',
-          background: 'rgba(244,63,94,.04)',
-          border: '1px solid rgba(244,63,94,.12)',
-          borderRadius: 14, fontSize: 12, color: '#64748b', lineHeight: 1.7, textAlign: 'center',
+          background: '#F3EDE3',
+          border: '1px solid #D8D1C4',
+          borderRadius: 6, fontSize: 12, color: '#6B7078', lineHeight: 1.6, textAlign: 'center',
         }}>
-          ⚠️ <strong style={{ color: '#94a3b8' }}>Research Prototype:</strong> NeuralScan AI is for academic demonstration only.
-          It has not been clinically validated and must not be used for medical diagnosis or treatment decisions.
-          Final models are trained on all subjects with no held-out test set; refer to cross-validation results in the associated paper.
+          Research and academic verification software. All neurophysiological classifications represent model outputs from academic datasets and do not constitute clinical diagnostic conclusions.
         </div>
       </main>
     </div>

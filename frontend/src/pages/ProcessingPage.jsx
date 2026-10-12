@@ -4,13 +4,13 @@ import axios from 'axios';
 import Navbar from '../components/Navbar';
 
 const STEPS = [
-  { label: 'Loading EEG recording',         icon: '📂' },
-  { label: 'Applying notch & band-pass filter', icon: '🔧' },
-  { label: 'Segmenting 4-second windows',   icon: '⚡' },
-  { label: 'Extracting spectral features',  icon: '📊' },
-  { label: 'Building coherence graphs',     icon: '🔗' },
-  { label: 'Running 5-model ensemble',      icon: '🧠' },
-  { label: 'Fusing head predictions',       icon: '✨' },
+  { label: 'Ingesting multi-channel EEG recording',   tag: 'I/O' },
+  { label: 'Applying 50 Hz notch & band-pass filter', tag: 'DSP' },
+  { label: 'Segmenting 4-second epochs (512 samples)', tag: 'EPOCH' },
+  { label: 'Extracting 16 spectral node features',    tag: 'FEAT' },
+  { label: 'Computing cross-spectral coherence',      tag: 'GRAPH' },
+  { label: 'Evaluating 5-seed neural ensemble',        tag: 'MODEL' },
+  { label: 'Calibrating multi-head posterior fusion', tag: 'INFER' },
 ];
 
 export default function ProcessingPage() {
@@ -21,7 +21,6 @@ export default function ProcessingPage() {
   const [error,    setError]    = useState(null);
   const called = useRef(false);
 
-  /* step ticker */
   useEffect(() => {
     const t = setInterval(() => {
       setStep(s => Math.min(s + 1, STEPS.length - 1));
@@ -30,7 +29,6 @@ export default function ProcessingPage() {
     return () => clearInterval(t);
   }, []);
 
-  /* API call */
   useEffect(() => {
     if (!state || called.current) return;
     const hasUpload = state.restFile || state.photicFile;
@@ -57,9 +55,9 @@ export default function ProcessingPage() {
       } catch (err) {
         console.error(err);
         const msg = err?.response?.data?.detail
-                 || (err?.code === 'ECONNABORTED' ? 'Request timed out — inference is taking longer than expected.' : null)
+                 || (err?.code === 'ECONNABORTED' ? 'Inference request timed out.' : null)
                  || err?.message
-                 || 'Backend error — please check the backend terminal.';
+                 || 'Backend error encountered.';
         setError(msg);
       }
     };
@@ -71,108 +69,113 @@ export default function ProcessingPage() {
       <Navbar />
 
       <main style={{
-        maxWidth: 600, margin: '0 auto', padding: '80px 24px',
+        maxWidth: 620, margin: '0 auto', padding: '60px 24px 80px',
         display: 'flex', flexDirection: 'column', alignItems: 'center',
       }}>
-
-        {/* Animated brain ring */}
-        <div style={{
-          position: 'relative', width: 120, height: 120,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          marginBottom: 40,
+        {/* Eyebrow */}
+        <p style={{
+          margin: '0 0 16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          fontFamily: "var(--font-mono)",
+          fontWeight: 500,
+          fontSize: '0.8125rem',
+          letterSpacing: '0.14em',
+          textTransform: 'uppercase',
+          color: '#6B7078',
+          width: '100%',
         }}>
-          {/* outer ring */}
-          <div style={{
-            position: 'absolute', inset: 0, borderRadius: '50%',
-            border: '2px solid transparent',
-            borderTopColor: '#22d3ee', borderLeftColor: '#22d3ee',
-            animation: 'spin 1s linear infinite',
-          }} />
-          {/* middle ring */}
-          <div style={{
-            position: 'absolute', inset: 10, borderRadius: '50%',
-            border: '2px solid transparent',
-            borderRightColor: '#7c3aed', borderBottomColor: '#7c3aed',
-            animation: 'rspin 1.4s linear infinite',
-          }} />
-          {/* inner */}
-          <div style={{
-            width: 60, height: 60, borderRadius: '50%',
-            background: 'rgba(8,13,26,.9)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 26,
-            boxShadow: '0 0 20px rgba(34,211,238,.2)',
-          }}>
-            🧠
-          </div>
-          {/* pulse ring */}
-          <div style={{
-            position: 'absolute', inset: -8, borderRadius: '50%',
-            border: '1px solid rgba(34,211,238,.3)',
-            animation: 'pulse-ring 2s ease-out infinite',
-          }} />
-        </div>
+          Pipeline Execution
+          <span style={{ height: 1, flex: 1, background: '#D9D2C5' }} />
+        </p>
 
+        {/* Heading in Newsreader */}
         <h2 style={{
-          fontFamily: "'Space Grotesk', sans-serif",
-          fontSize: 24, fontWeight: 700, color: '#e2e8f0', marginBottom: 8, textAlign: 'center',
+          fontFamily: "var(--font-serif)",
+          fontSize: 'clamp(2rem, 1rem + 2.4vw, 3rem)',
+          fontWeight: 400,
+          lineHeight: 1.1,
+          letterSpacing: '-0.02em',
+          color: '#14161A',
+          marginBottom: 10,
+          textAlign: 'center',
         }}>
-          Analysing EEG Signal
+          Processing neurophysiological signals.
         </h2>
-        <p style={{ fontSize: 14, color: '#64748b', textAlign: 'center', marginBottom: 36, maxWidth: 380 }}>
-          The 5-seed ensemble is processing your recording through temporal and graph encoders.
+
+        <p style={{
+          fontSize: 14, color: '#3A3E45', textAlign: 'center',
+          marginBottom: 32, maxWidth: 420, lineHeight: 1.6,
+        }}>
+          Evaluating spatial coherence topologies and temporal multi-scale convolutional kernels.
         </p>
 
         {/* Progress bar */}
         <div style={{
-          width: '100%', height: 6, borderRadius: 9999,
-          background: 'rgba(99,129,255,.1)', overflow: 'hidden', marginBottom: 8,
+          width: '100%', height: 5, borderRadius: 3,
+          background: '#D9D2C5', overflow: 'hidden', marginBottom: 8,
         }}>
           <div style={{
-            height: '100%', borderRadius: 9999,
-            background: 'linear-gradient(90deg, #22d3ee, #6366f1, #7c3aed)',
+            height: '100%', borderRadius: 3,
+            background: '#84512E',
             width: `${progress}%`,
-            transition: 'width .6s ease',
-            animation: 'progress-glow 2s ease-in-out infinite',
+            transition: 'width .5s ease',
           }} />
         </div>
-        <p style={{ fontSize: 12, color: '#22d3ee', marginBottom: 40 }}>
-          {Math.round(progress)}% complete
+        <p style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: 12, color: '#84512E', fontWeight: 600,
+          marginBottom: 30, letterSpacing: '0.04em',
+        }}>
+          {Math.round(progress)}% COMPLETE
         </p>
 
-        {/* Steps list */}
-        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {/* Steps card */}
+        <div style={{
+          width: '100%',
+          background: '#FAF6F0',
+          border: '1px solid #D8D1C4',
+          borderRadius: 8,
+          padding: '12px 14px',
+          display: 'flex', flexDirection: 'column', gap: 6,
+        }}>
           {STEPS.map((s, i) => {
             const done    = i < step;
             const current = i === step;
             return (
               <div key={i} style={{
                 display: 'flex', alignItems: 'center', gap: 12,
-                padding: '12px 16px', borderRadius: 12,
-                background: current ? 'rgba(34,211,238,.06)' : done ? 'rgba(16,185,129,.04)' : 'rgba(8,13,26,.5)',
-                border: current ? '1px solid rgba(34,211,238,.2)' : done ? '1px solid rgba(16,185,129,.15)' : '1px solid rgba(99,129,255,.06)',
-                transition: 'all .4s',
+                padding: '8px 12px', borderRadius: 6,
+                background: current ? '#F3EDE3' : 'transparent',
+                border: current ? '1px solid #D5CEBF' : '1px solid transparent',
+                transition: 'all .15s ease',
               }}>
-                <div style={{
-                  width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13,
-                  background: done ? 'rgba(16,185,129,.15)' : current ? 'rgba(34,211,238,.12)' : 'rgba(99,129,255,.06)',
-                  border: done ? '1px solid rgba(16,185,129,.3)' : current ? '1px solid rgba(34,211,238,.3)' : '1px solid rgba(99,129,255,.1)',
-                }}>
-                  {done ? '✓' : s.icon}
-                </div>
                 <span style={{
-                  fontSize: 13, fontWeight: current ? 600 : 400,
-                  color: done ? '#6ee7b7' : current ? '#67e8f9' : '#475569',
-                  transition: 'color .4s',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 10,
+                  fontWeight: 600,
+                  letterSpacing: '0.08em',
+                  color: done ? '#84512E' : current ? '#14161A' : '#A09789',
+                  minWidth: 42,
+                }}>
+                  {done ? 'DONE' : s.tag}
+                </span>
+
+                <span style={{
+                  fontSize: 13,
+                  fontWeight: current ? 600 : 400,
+                  color: done ? '#14161A' : current ? '#84512E' : '#6B7078',
+                  flex: 1,
                 }}>
                   {s.label}
                 </span>
+
                 {current && (
                   <div style={{
-                    marginLeft: 'auto', width: 16, height: 16, borderRadius: '50%',
-                    border: '2px solid rgba(34,211,238,.4)',
-                    borderTopColor: '#22d3ee',
+                    width: 12, height: 12, borderRadius: '50%',
+                    border: '1.5px solid #D8D1C4',
+                    borderTopColor: '#84512E',
                     animation: 'spin .8s linear infinite',
                   }} />
                 )}
@@ -184,9 +187,9 @@ export default function ProcessingPage() {
         {error && (
           <div style={{
             marginTop: 24, padding: '14px 18px',
-            background: 'rgba(244,63,94,.08)',
-            border: '1px solid rgba(244,63,94,.25)',
-            borderRadius: 14, fontSize: 13, color: '#fca5a5',
+            background: '#F7E8E4',
+            border: '1px solid #E2C2BA',
+            borderRadius: 8, fontSize: 13, color: '#8A2B1D',
             width: '100%', textAlign: 'center',
           }}>
             <strong>Error: </strong>{error}
@@ -194,9 +197,9 @@ export default function ProcessingPage() {
               onClick={() => navigate('/')}
               style={{
                 display: 'block', margin: '12px auto 0',
-                padding: '8px 20px', borderRadius: 8,
-                background: 'rgba(244,63,94,.15)', border: '1px solid rgba(244,63,94,.3)',
-                color: '#f87171', cursor: 'pointer', fontSize: 13,
+                padding: '8px 16px', borderRadius: 6,
+                background: '#FFFFFF', border: '1px solid #D8D1C4',
+                color: '#14161A', cursor: 'pointer', fontSize: 12, fontWeight: 600,
               }}>
               ← Back to Upload
             </button>

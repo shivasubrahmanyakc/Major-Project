@@ -3,32 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 
-/* ── tiny inline icon helpers ─────────────────────────────────────── */
+/* ── Inline icon helpers ── */
 const UploadIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
     <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
   </svg>
 );
 const FileIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
   </svg>
 );
 const XIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
   </svg>
 );
-const BrainIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>
-    <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/>
-  </svg>
-);
 
-/* ── Dropzone sub-component ─────────────────────────────────────────── */
-function Dropzone({ label, sublabel, color, file, onFile, onClear, accept = ".set" }) {
+/* ── Dropzone sub-component ── */
+function Dropzone({ label, sublabel, file, onFile, onClear, accept = ".set" }) {
   const inputRef = useRef();
   const [dragging, setDragging] = useState(false);
 
@@ -39,15 +33,17 @@ function Dropzone({ label, sublabel, color, file, onFile, onClear, accept = ".se
     handle(e.dataTransfer.files[0]);
   };
 
-  const colorMap = {
-    cyan:   { border: 'rgba(34,211,238,.35)',  bg: 'rgba(34,211,238,.06)',  text: '#22d3ee', glow: 'rgba(34,211,238,.15)' },
-    violet: { border: 'rgba(124,58,237,.35)',  bg: 'rgba(124,58,237,.06)',  text: '#a78bfa', glow: 'rgba(124,58,237,.15)' },
-  };
-  const c = colorMap[color] || colorMap.cyan;
-
   return (
     <div style={{ flex: 1, minWidth: 0 }}>
-      <p style={{ fontSize: 13, fontWeight: 600, color: c.text, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>
+      <p style={{
+        fontFamily: 'var(--font-mono)',
+        fontSize: '0.75rem',
+        fontWeight: 600,
+        letterSpacing: '0.1em',
+        textTransform: 'uppercase',
+        color: '#6B7078',
+        marginBottom: 8,
+      }}>
         {label}
       </p>
       {!file ? (
@@ -57,42 +53,43 @@ function Dropzone({ label, sublabel, color, file, onFile, onClear, accept = ".se
           onDragLeave={() => setDragging(false)}
           onDrop={onDrop}
           style={{
-            border: `2px dashed ${dragging ? c.text : c.border}`,
-            borderRadius: 16,
-            padding: '32px 24px',
+            border: `1.5px dashed ${dragging ? '#84512E' : '#C8C0B2'}`,
+            borderRadius: 8,
+            padding: '28px 20px',
             textAlign: 'center',
             cursor: 'pointer',
-            background: dragging ? c.bg : 'transparent',
-            transition: 'all .2s',
-            minHeight: 140,
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10,
+            background: dragging ? 'rgba(132,81,46,0.04)' : '#F5EFEB',
+            transition: 'all .2s ease',
+            minHeight: 120,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8,
           }}
         >
-          <div style={{ color: c.text, opacity: 0.7 }}><UploadIcon /></div>
+          <div style={{ color: '#84512E', opacity: 0.85 }}><UploadIcon /></div>
           <div>
-            <p style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 500 }}>Drop .set file or <span style={{ color: c.text, textDecoration: 'underline' }}>browse</span></p>
-            <p style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>{sublabel}</p>
+            <p style={{ fontSize: 13, color: '#14161A', fontWeight: 500 }}>
+              Drop .set file or <span style={{ color: '#84512E', textDecoration: 'underline' }}>browse file</span>
+            </p>
+            <p style={{ fontSize: 11, color: '#6B7078', marginTop: 3 }}>{sublabel}</p>
           </div>
           <input ref={inputRef} type="file" accept={accept} style={{ display: 'none' }}
             onChange={e => handle(e.target.files[0])} />
         </div>
       ) : (
         <div style={{
-          borderRadius: 16, padding: '16px 18px',
-          background: c.bg,
-          border: `1px solid ${c.border}`,
+          borderRadius: 8, padding: '12px 16px',
+          background: '#F5EFEB',
+          border: '1px solid #D8D1C4',
           display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'space-between',
-          boxShadow: `0 0 20px ${c.glow}`,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
-            <span style={{ color: c.text }}><FileIcon /></span>
-            <span style={{ fontSize: 13, color: '#e2e8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <span style={{ color: '#84512E' }}><FileIcon /></span>
+            <span style={{ fontSize: 13, color: '#14161A', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {file.name}
             </span>
           </div>
           <button onClick={onClear} style={{
-            flexShrink: 0, background: 'rgba(244,63,94,.15)', border: '1px solid rgba(244,63,94,.3)',
-            borderRadius: 8, color: '#f43f5e', cursor: 'pointer', padding: '4px 6px',
+            flexShrink: 0, background: '#EAE2D5', border: '1px solid #D5CEBF',
+            borderRadius: 6, color: '#6B7078', cursor: 'pointer', padding: '4px 6px',
             display: 'flex', alignItems: 'center',
           }}><XIcon /></button>
         </div>
@@ -101,30 +98,22 @@ function Dropzone({ label, sublabel, color, file, onFile, onClear, accept = ".se
   );
 }
 
-/* ── Main page ────────────────────────────────────────────────────── */
+/* ── Main Upload Page ── */
 export default function UploadPage() {
   const [activeTab, setActiveTab] = useState('local'); // 'local' | 'upload'
   const [localFiles, setLocalFiles] = useState([]);
-  const [selectedRestLocal, setSelectedRestLocal] = useState('');
-  const [selectedPhoticLocal, setSelectedPhoticLocal] = useState('');
-
-  const [restFile,   setRestFile]   = useState(null);
-  const [photicFile, setPhoticFile] = useState(null);
-  const [error,      setError]      = useState(null);
+  const [selectedLocalFile, setSelectedLocalFile] = useState('');
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // Fetch local EEG_SET_FILES from backend
   useEffect(() => {
     axios.get('http://127.0.0.1:8000/local-files')
       .then(res => {
         const files = res.data?.files || [];
         setLocalFiles(files);
         if (files.length > 0) {
-          // Preselect first rest file if available
-          const restGuess = files.find(f => f.filename.toLowerCase().includes('rest')) || files[0];
-          if (restGuess) setSelectedRestLocal(restGuess.filename);
-          const photicGuess = files.find(f => f.filename.toLowerCase().includes('photic') && f.filename !== restGuess.filename);
-          if (photicGuess) setSelectedPhoticLocal(photicGuess.filename);
+          setSelectedLocalFile(files[0].filename);
           setActiveTab('local');
         } else {
           setActiveTab('upload');
@@ -136,8 +125,8 @@ export default function UploadPage() {
   }, []);
 
   const canAnalyze = activeTab === 'local'
-    ? (!!selectedRestLocal || !!selectedPhoticLocal)
-    : (!!restFile || !!photicFile);
+    ? !!selectedLocalFile
+    : !!uploadedFile;
 
   const handleAnalyze = () => {
     if (!canAnalyze) return;
@@ -145,24 +134,29 @@ export default function UploadPage() {
     if (activeTab === 'local') {
       navigate('/processing', {
         state: {
-          localRest: selectedRestLocal || null,
-          localPhotic: selectedPhoticLocal || null,
+          localRest: selectedLocalFile,
+          localPhotic: null,
         }
       });
     } else {
-      navigate('/processing', { state: { restFile, photicFile } });
+      navigate('/processing', {
+        state: {
+          restFile: uploadedFile,
+          photicFile: null,
+        }
+      });
     }
   };
 
   const selectStyle = {
     width: '100%',
-    padding: '12px 16px',
-    borderRadius: 12,
-    background: 'rgba(15,23,42,.8)',
-    border: '1px solid rgba(99,129,255,.25)',
-    color: '#e2e8f0',
+    padding: '11px 14px',
+    borderRadius: 8,
+    background: '#FAF7F2',
+    border: '1px solid #D8D1C4',
+    color: '#14161A',
     fontSize: 13,
-    fontFamily: 'inherit',
+    fontFamily: 'var(--font-sans)',
     outline: 'none',
     cursor: 'pointer',
   };
@@ -171,271 +165,259 @@ export default function UploadPage() {
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <Navbar />
 
-      <main style={{ maxWidth: 1000, margin: '0 auto', padding: '60px 24px 80px' }}>
+      <main style={{ maxWidth: 1080, margin: '0 auto', padding: 'clamp(3rem, 5vw, 5rem) 24px 80px' }}>
 
-        {/* ── Hero ── */}
-        <div style={{ textAlign: 'center', marginBottom: 50 }} className="animate-fade-up">
-          <div style={{ position: 'relative', display: 'inline-block', marginBottom: 20 }}>
-            <div style={{
-              position: 'absolute', inset: -20,
-              background: 'radial-gradient(circle, rgba(34,211,238,.25) 0%, transparent 70%)',
-              borderRadius: '50%', pointerEvents: 'none',
-            }} />
-            <div style={{
-              width: 68, height: 68, borderRadius: 20,
-              background: 'linear-gradient(135deg, rgba(34,211,238,.2), rgba(124,58,237,.2))',
-              border: '1px solid rgba(34,211,238,.3)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '0 auto',
-              animation: 'float 4s ease-in-out infinite',
-              color: '#22d3ee',
-            }} className="animate-float">
-              <BrainIcon />
-            </div>
-          </div>
-
-          <h1 style={{
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: 'clamp(34px, 5vw, 54px)',
-            fontWeight: 800, lineHeight: 1.15,
-            marginBottom: 14,
-          }}>
-            <span style={{ color: '#e2e8f0' }}>Neural</span>
-            <span className="brand-text">Scan</span>
-            <span style={{ color: '#e2e8f0' }}> AI</span>
-          </h1>
-
+        {/* ── Editorial Hero Section (SapientPriors Style) ── */}
+        <div style={{ marginBottom: 44 }} className="animate-fade-up">
+          {/* Eyebrow with extending hairline rule */}
           <p style={{
-            fontSize: 16, color: '#94a3b8', maxWidth: 540, margin: '0 auto 12px',
-            lineHeight: 1.6,
+            margin: '0 0 20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            fontFamily: "var(--font-mono)",
+            fontWeight: 500,
+            fontSize: '0.8125rem',
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            color: '#6B7078',
           }}>
-            Clinical EEG classification with a 5-seed Temporal + Graph Neural Network Ensemble.
-            Differentiates <strong style={{ color: '#e2e8f0' }}>Alzheimer's Disease (AD)</strong>, {' '}
-            <strong style={{ color: '#e2e8f0' }}>Frontotemporal Dementia (FTD)</strong>, and {' '}
-            <strong style={{ color: '#e2e8f0' }}>Cognitively Normal (CN)</strong>.
+            Clinical Neuroinformatics
+            <span style={{ height: 1, flex: 1, background: '#D9D2C5' }} />
           </p>
 
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            padding: '6px 16px', borderRadius: 9999,
-            background: 'rgba(244,63,94,.08)',
-            border: '1px solid rgba(244,63,94,.2)',
-            fontSize: 12, color: '#fca5a5', fontWeight: 500,
+          {/* Heading in Newsreader */}
+          <h1 style={{
+            margin: '0 0 20px',
+            maxWidth: '48rem',
+            fontFamily: "var(--font-serif)",
+            fontWeight: 400,
+            fontSize: 'clamp(2.4rem, 1.2rem + 3.8vw, 4.4rem)',
+            lineHeight: 1.05,
+            letterSpacing: '-0.025em',
+            color: '#14161A',
           }}>
-            ⚠️ Research prototype — 19-channel 10-20 standard
-          </div>
+            Deciphering neurodegenerative patterns from continuous EEG.
+          </h1>
+
+          {/* Subheading in Inter */}
+          <p style={{
+            margin: 0,
+            maxWidth: '42rem',
+            fontFamily: "var(--font-sans)",
+            fontSize: 'clamp(1.05rem, 0.98rem + 0.3vw, 1.25rem)',
+            lineHeight: 1.6,
+            color: '#3A3E45',
+          }}>
+            A multimodal 5-seed Temporal + Graph Neural Network Ensemble evaluating Alzheimer's Disease (AD), Frontotemporal Dementia (FTD), and Cognitively Normal (CN) EEG recordings.
+          </p>
         </div>
 
         {/* ── Main Input Card ── */}
         <div style={{
-          background: 'rgba(8,13,26,.85)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(99,129,255,.16)',
-          borderRadius: 24,
-          padding: '36px 36px 40px',
-          marginBottom: 40,
-          boxShadow: '0 0 80px rgba(34,211,238,.06)',
+          background: '#FAF6F0',
+          border: '1px solid #D8D1C4',
+          borderRadius: 10,
+          padding: '28px 32px 32px',
+          marginBottom: 36,
+          boxShadow: '0 1px 3px rgba(20, 22, 26, 0.04)',
         }} className="animate-fade-up">
 
           {/* Mode Switch Tabs */}
           <div style={{
-            display: 'flex', gap: 12, marginBottom: 28,
-            borderBottom: '1px solid rgba(99,129,255,.12)',
-            paddingBottom: 16,
+            display: 'flex', gap: 10, marginBottom: 24,
+            borderBottom: '1px solid #E2DBD0',
+            paddingBottom: 14,
           }}>
             <button
               onClick={() => setActiveTab('local')}
               style={{
-                background: activeTab === 'local' ? 'rgba(34,211,238,.12)' : 'transparent',
-                border: activeTab === 'local' ? '1px solid rgba(34,211,238,.4)' : '1px solid transparent',
-                borderRadius: 10,
-                padding: '8px 16px',
-                color: activeTab === 'local' ? '#22d3ee' : '#94a3b8',
+                background: activeTab === 'local' ? '#84512E' : 'transparent',
+                border: activeTab === 'local' ? '1px solid #744525' : '1px solid transparent',
+                borderRadius: 6,
+                padding: '7px 16px',
+                color: activeTab === 'local' ? '#FFFFFF' : '#3A3E45',
                 fontSize: 13,
-                fontWeight: 600,
+                fontWeight: 500,
+                fontFamily: 'var(--font-sans)',
                 cursor: 'pointer',
                 display: 'flex', alignItems: 'center', gap: 8,
-                transition: 'all .2s',
+                transition: 'all .15s ease',
               }}
             >
-              <span>📁</span> Select from EEG_SET_FILES {localFiles.length > 0 && `(${localFiles.length} detected)`}
+              <span>📁</span> Local EEG Files {localFiles.length > 0 && `(${localFiles.length})`}
             </button>
             <button
               onClick={() => setActiveTab('upload')}
               style={{
-                background: activeTab === 'upload' ? 'rgba(167,139,250,.12)' : 'transparent',
-                border: activeTab === 'upload' ? '1px solid rgba(167,139,250,.4)' : '1px solid transparent',
-                borderRadius: 10,
-                padding: '8px 16px',
-                color: activeTab === 'upload' ? '#a78bfa' : '#94a3b8',
+                background: activeTab === 'upload' ? '#84512E' : 'transparent',
+                border: activeTab === 'upload' ? '1px solid #744525' : '1px solid transparent',
+                borderRadius: 6,
+                padding: '7px 16px',
+                color: activeTab === 'upload' ? '#FFFFFF' : '#3A3E45',
                 fontSize: 13,
-                fontWeight: 600,
+                fontWeight: 500,
+                fontFamily: 'var(--font-sans)',
                 cursor: 'pointer',
                 display: 'flex', alignItems: 'center', gap: 8,
-                transition: 'all .2s',
+                transition: 'all .15s ease',
               }}
             >
-              <span>📤</span> Drag & Drop .set Files
+              <span>📤</span> Upload .set Files
             </button>
           </div>
 
           {/* Tab 1: Local Files Selector */}
           {activeTab === 'local' && (
-            <div style={{ marginBottom: 28 }}>
+            <div style={{ marginBottom: 24 }}>
               <div style={{
-                background: 'rgba(34,211,238,.04)',
-                border: '1px solid rgba(34,211,238,.15)',
-                borderRadius: 14,
-                padding: '14px 18px',
+                background: '#F3EDE3',
+                border: '1px solid #D8D1C4',
+                borderRadius: 8,
+                padding: '12px 16px',
                 marginBottom: 20,
                 fontSize: 13,
-                color: '#94a3b8',
+                color: '#3A3E45',
                 lineHeight: 1.5,
               }}>
-                <span style={{ color: '#22d3ee', fontWeight: 600 }}>Connected to your EEG folder:</span>
-                <code style={{ marginLeft: 8, color: '#e2e8f0', background: 'rgba(0,0,0,.3)', padding: '2px 6px', borderRadius: 4 }}>
+                <span style={{ color: '#14161A', fontWeight: 600 }}>Active Directory:</span>
+                <code style={{ marginLeft: 8, color: '#84512E', fontFamily: 'var(--font-mono)', background: 'rgba(255,255,255,0.7)', padding: '2px 6px', borderRadius: 4, border: '1px solid #D8D1C4' }}>
                   EEG_SET_FILES
                 </code>
-                <p style={{ marginTop: 4, fontSize: 12, color: '#64748b' }}>
-                  Files are loaded directly from disk — companion .fdt data is read automatically without upload delay.
+                <p style={{ marginTop: 4, fontSize: 12, color: '#6B7078' }}>
+                  Dataset files are ingested directly with companion .fdt multi-channel traces mapped automatically.
                 </p>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
-                {/* Rest recording picker */}
-                <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#22d3ee', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.8 }}>
-                    Eyes-Closed Rest (.set)
-                  </label>
-                  <select
-                    style={selectStyle}
-                    value={selectedRestLocal}
-                    onChange={e => setSelectedRestLocal(e.target.value)}
-                  >
-                    <option value="">-- Choose REST Recording --</option>
-                    {localFiles.map(f => (
-                      <option key={f.filename} value={f.filename}>{f.filename}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Photic recording picker */}
-                <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#a78bfa', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.8 }}>
-                    Photic Stimulation (.set) <span style={{ color: '#64748b', fontSize: 11 }}>(Optional)</span>
-                  </label>
-                  <select
-                    style={selectStyle}
-                    value={selectedPhoticLocal}
-                    onChange={e => setSelectedPhoticLocal(e.target.value)}
-                  >
-                    <option value="">-- None / Single Condition --</option>
-                    {localFiles.map(f => (
-                      <option key={f.filename} value={f.filename}>{f.filename}</option>
-                    ))}
-                  </select>
-                </div>
+              <div>
+                <label style={{
+                  display: 'block',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color: '#6B7078',
+                  marginBottom: 8,
+                }}>
+                  EEG Signals (.set)
+                </label>
+                <select
+                  style={selectStyle}
+                  value={selectedLocalFile}
+                  onChange={e => setSelectedLocalFile(e.target.value)}
+                >
+                  <option value="">-- Choose EEG Signal File --</option>
+                  {localFiles.map(f => (
+                    <option key={f.filename} value={f.filename}>{f.filename}</option>
+                  ))}
+                </select>
               </div>
             </div>
           )}
 
-          {/* Tab 2: Drag & Drop Dropzones */}
+          {/* Tab 2: Drag & Drop Dropzone for EEG Signals */}
           {activeTab === 'upload' && (
-            <div style={{ marginBottom: 28 }}>
-              <p style={{ fontSize: 13, color: '#64748b', marginBottom: 20 }}>
-                Drop or browse .set files. Companion .fdt files in <code>EEG_SET_FILES</code> are auto-linked.
-              </p>
-              <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-                <Dropzone
-                  label="Eyes-Closed Rest"
-                  sublabel="Baseline resting-state EEG"
-                  color="cyan"
-                  file={restFile}
-                  onFile={setRestFile}
-                  onClear={() => setRestFile(null)}
-                />
-                <Dropzone
-                  label="Photic Stimulation"
-                  sublabel="Intermittent light stimulation EEG"
-                  color="violet"
-                  file={photicFile}
-                  onFile={setPhoticFile}
-                  onClear={() => setPhoticFile(null)}
-                />
-              </div>
+            <div style={{ marginBottom: 24 }}>
+              <Dropzone
+                label="EEG Signals (.set)"
+                sublabel="Upload .set multi-channel recording from your computer"
+                file={uploadedFile}
+                onFile={setUploadedFile}
+                onClear={() => setUploadedFile(null)}
+              />
             </div>
           )}
 
-          {/* Mode indicator banner */}
+          {/* Condition indicator */}
           {canAnalyze && (
             <div style={{
-              marginBottom: 24, padding: '10px 16px',
-              background: 'rgba(16,185,129,.06)',
-              border: '1px solid rgba(16,185,129,.2)',
-              borderRadius: 12, fontSize: 13, color: '#6ee7b7',
+              marginBottom: 20, padding: '10px 14px',
+              background: '#F3EDE3',
+              border: '1px solid #D8D1C4',
+              borderRadius: 6, fontSize: 13, color: '#3A3E45',
               display: 'flex', alignItems: 'center', gap: 8,
             }}>
-              <span style={{ fontSize: 16 }}>
-                {(activeTab === 'local' ? (selectedRestLocal && selectedPhoticLocal) : (restFile && photicFile)) ? '✅' : '⚡'}
-              </span>
-              {(activeTab === 'local' ? (selectedRestLocal && selectedPhoticLocal) : (restFile && photicFile))
-                ? 'Dual-recording mode active — running fusion of rest + photic signals'
-                : 'Single-recording mode active'}
+              <span style={{ color: '#84512E', fontWeight: 700 }}>•</span>
+              EEG signal recording selected for analysis
             </div>
           )}
 
           {error && (
             <div style={{
-              marginBottom: 20, padding: '10px 16px',
-              background: 'rgba(244,63,94,.08)',
-              border: '1px solid rgba(244,63,94,.25)',
-              borderRadius: 12, fontSize: 13, color: '#fca5a5',
+              marginBottom: 16, padding: '10px 14px',
+              background: '#F7E8E4',
+              border: '1px solid #E2C2BA',
+              borderRadius: 6, fontSize: 13, color: '#8A2B1D',
             }}>{error}</div>
           )}
 
-          {/* Analyze button */}
+          {/* Primary Action Button (SapientPriors Cognac Pill) */}
           <button
             onClick={handleAnalyze}
             disabled={!canAnalyze}
             id="analyze-btn"
             style={{
-              width: '100%', padding: '16px 24px',
-              borderRadius: 14, border: 'none', cursor: canAnalyze ? 'pointer' : 'not-allowed',
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: 16, fontWeight: 700, letterSpacing: 0.5,
-              background: canAnalyze
-                ? 'linear-gradient(135deg, #22d3ee 0%, #6366f1 50%, #7c3aed 100%)'
-                : 'rgba(99,129,255,.1)',
-              color: canAnalyze ? '#fff' : '#64748b',
-              transition: 'all .25s',
-              boxShadow: canAnalyze ? '0 0 30px rgba(34,211,238,.3)' : 'none',
+              width: '100%', padding: '14px 20px',
+              borderRadius: 8, border: 'none',
+              cursor: canAnalyze ? 'pointer' : 'not-allowed',
+              fontFamily: 'var(--font-sans)',
+              fontSize: 14, fontWeight: 600,
+              letterSpacing: '0.01em',
+              background: canAnalyze ? '#84512E' : '#D0C8BB',
+              color: canAnalyze ? '#FFFFFF' : '#8A8275',
+              transition: 'background 0.15s ease',
+              boxShadow: canAnalyze ? '0 1px 3px rgba(132, 81, 46, 0.2)' : 'none',
             }}
+            onMouseEnter={e => { if (canAnalyze) e.currentTarget.style.background = '#6D4122'; }}
+            onMouseLeave={e => { if (canAnalyze) e.currentTarget.style.background = '#84512E'; }}
           >
-            {canAnalyze ? '⚡ Run NeuralScan Analysis' : 'Select or upload at least one recording to begin'}
+            {canAnalyze ? 'Run NeuralScan Classification' : 'Select a recording to begin analysis'}
           </button>
         </div>
 
-        {/* ── Feature highlights ── */}
+        {/* ── Feature Highlights (Editorial Cards) ── */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
           gap: 16,
         }}>
           {[
-            { icon: '🧠', title: '5-Seed Deep Ensemble', desc: 'Averaged over 5 independently trained checkpoints' },
-            { icon: '📡', title: 'Dual-Condition Fusion', desc: 'Rest + photic multi-modal cross-attention' },
-            { icon: '🔗', title: 'Spectral Coherence Graph', desc: '19-channel inter-electrode functional connectivity' },
-            { icon: '⚡', title: 'Multi-scale Temporal CNN', desc: 'Learns frequency & transient temporal waveforms' },
+            { tag: 'ENSEMBLE', title: '5-Seed Deep Stacking', desc: 'Averages predictions over 5 independently trained checkpoints to reduce variance.' },
+            { tag: 'FUSION', title: 'Spatial-Temporal Fusion', desc: 'Fuses temporal waveform representations with topological inter-electrode coherence.' },
+            { tag: 'SPATIAL', title: 'Chebyshev Graph GCN', desc: 'Models 19-channel inter-electrode spectral coherence across canonical bands.' },
+            { tag: 'TEMPORAL', title: 'Multi-scale CNN Encoder', desc: 'Processes 4-second time series segments to extract transient oscillatory signatures.' },
           ].map((f, i) => (
             <div key={i} style={{
-              background: 'rgba(15,23,42,.6)',
-              border: '1px solid rgba(99,129,255,.12)',
-              borderRadius: 16,
+              background: '#FAF6F0',
+              border: '1px solid #D8D1C4',
+              borderRadius: 8,
               padding: '20px 18px',
             }}>
-              <span style={{ fontSize: 24, display: 'block', marginBottom: 10 }}>{f.icon}</span>
-              <h3 style={{ fontSize: 14, fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}>{f.title}</h3>
-              <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>{f.desc}</p>
+              <span style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.6875rem',
+                fontWeight: 600,
+                letterSpacing: '0.12em',
+                color: '#84512E',
+                display: 'block',
+                marginBottom: 6,
+              }}>
+                {f.tag}
+              </span>
+              <h3 style={{
+                fontFamily: 'var(--font-serif)',
+                fontSize: 18,
+                fontWeight: 600,
+                color: '#14161A',
+                marginBottom: 6,
+                letterSpacing: '-0.01em',
+              }}>
+                {f.title}
+              </h3>
+              <p style={{ fontSize: 13, color: '#6B7078', lineHeight: 1.5, margin: 0 }}>
+                {f.desc}
+              </p>
             </div>
           ))}
         </div>
