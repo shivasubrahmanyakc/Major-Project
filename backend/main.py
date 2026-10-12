@@ -46,8 +46,8 @@ except Exception as exc:
 
 
 EEG_SET_DIRS = [
-    r"C:\Users\shiva\Desktop\New folder\New Data\EEG_SET_FILES",
-    r"C:\Users\shiva\Desktop\New folder\New Data",
+    r"C:\Users\shiva\Desktop\Major Paper\New folder\New Data\EEG_SET_FILES",
+    r"C:\Users\shiva\Desktop\Major Paper\New folder\New Data",
 ]
 
 
